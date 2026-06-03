@@ -1,1 +1,1615 @@
+<!DOCTYPE html>
+<html lang="en">    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Periodic Table of Elements</title>
+</head>
+<body>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html{
+            scroll-behavior: smooth;
+            scrollbar-color: #00D9FF #0A1E3F;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0A1E3F 0%, #1a3a52 50%, #0D47A1 100%);
+            padding: 30px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00D9FF 0%, #00FF87 50%, #FFD700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 217, 255, 0.3);
+            font-weight: 900;
+            filter: drop-shadow(0 0 25px rgba(0, 217, 255, 0.3));
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #00FF87;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-shadow: 0 2px 8px rgba(0, 255, 135, 0.2);
+        }
+        
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(225,245,254,0.97) 100%);
+            border: 3px solid rgba(0, 150, 255, 0.4);
+            border-radius: 15px;
+            box-shadow: 0 8px 35px rgba(0, 150, 255, 0.2);
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .legend-box {
+            width: 35px;
+            height: 25px;
+            border: 3px solid #333;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .table-wrapper {
+            background: linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(225,245,254,0.97) 100%);
+            padding: 30px;
+            border: 3px solid rgba(0, 150, 255, 0.4);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            box-shadow: 0 8px 35px rgba(0, 150, 255, 0.2);
+        }
+        
+        .table {
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            gap: 10px;
+        }
+        
+        .element {
+            aspect-ratio: 1 / 1.35;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 8px;
+            padding: 6px;
+            font-size: 0.8em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            min-height: 95px;
+            font-weight: 600;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.25);
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .element:hover {
+            transform: scale(1.15) translateY(-10px) rotateY(5deg);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4), 0 0 40px rgba(255,215,0,0.3);
+            z-index: 10;
+            filter: brightness(1.25) saturate(1.3);
+            border-color: rgba(255,255,255,0.8);
+        }
+        
+        .elem-num {
+            position: absolute;
+            top: 4px;
+            left: 5px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        
+        .elem-group {
+            position: absolute;
+            top: 4px;
+            right: 5px;
+            font-size: 0.75em;
+            opacity: 0.7;
+        }
+        
+        .elem-sym {
+            font-size: 2em;
+            font-weight: 900;
+            letter-spacing: 1px;
+            margin: 3px 0;
+        }
+        
+        .elem-name {
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+        
+        .elem-mass {
+            font-size: 0.68em;
+            margin-top: 2px;
+        }
+        
+        /* Element Categories */
+        .alkali { background: linear-gradient(135deg, #FF5252 0%, #FF6E40 100%); }
+        .alkaline { background: linear-gradient(135deg, #FFAB40 0%, #FFC107 100%); }
+        .transition { background: linear-gradient(135deg, #2979F0 0%, #1565C0 100%); }
+        .post-transition { background: linear-gradient(135deg, #7986CB 0%, #5C6BC0 100%); }
+        .lanthanide { background: linear-gradient(135deg, #00C853 0%, #00BCD4 100%); }
+        .actinide { background: linear-gradient(135deg, #D32F2F 0%, #D81B60 100%); }
+        .metalloid { background: linear-gradient(135deg, #ecec06 0%, #d4d404 100%); }
+        .nonmetal { background: linear-gradient(135deg, #00E676 0%, #1DE9B6 100%); }
+        .halogen { background: linear-gradient(135deg, #FFD600 0%, #FFCA28 100%); }
+        .noble { background: linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%); }
+        .unknown { background: linear-gradient(135deg, #B0B0B0 0%, #808080 100%); }
+        
+        .f-section {
+            margin-bottom: 30px;
+        }
+        
+        .f-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #00BCD4;
+            font-size: 1.4em;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
+            letter-spacing: 1px;
+        }
+        
+        .f-row {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(225,245,254,0.97) 100%);
+            padding: 20px;
+            border: 3px solid rgba(0, 150, 255, 0.4);
+            border-radius: 15px;
+            box-shadow: 0 8px 35px rgba(0, 150, 255, 0.2);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #ffffff 0%, #e8f4f8 100%);
+            padding: 35px;
+            border: 4px solid rgba(0, 150, 255, 0.6);
+            border-radius: 18px;
+            max-width: 550px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 100, 200, 0.5), 0 0 50px rgba(0, 200, 255, 0.3);
+        }
+        
+        .close-btn {
+            float: right;
+            font-size: 2em;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #FF5252;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .close-btn:hover {
+            color: #D32F2F;
+            transform: scale(1.4) rotate(90deg);
+        }
+        
+        .modal-header {
+            clear: both;
+            border-bottom: 3px solid rgba(0, 150, 255, 0.3);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .modal-sym {
+            font-size: 3.5em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #0096FF 0%, #00D9FF 50%, #00FF87 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 2px 8px rgba(0, 150, 200, 0.3));
+        }
+        
+        .modal-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+        
+        .modal-info {
+            display: grid;
+            gap: 12px;
+        }
+        
+        .info-row {
+            display: grid;
+            grid-template-columns: 130px 1fr;
+            gap: 20px;
+            padding: 12px;
+            border-bottom: 2px solid rgba(0, 150, 255, 0.25);
+            border-radius: 5px;
+            background: rgba(0, 150, 255, 0.08);
+            transition: all 0.3s;
+        }
+        
+        .info-row:hover {
+            background: rgba(0, 150, 255, 0.15);
+            border-bottom-color: rgba(0, 150, 255, 0.5);
+            padding-left: 18px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #0075B9;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1.5px;
+        }
+        
+        .info-val {
+            color: #1a1a2e;
+            font-weight: 500;
+        }
+        
+        .category-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .category-item {
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 5px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .category-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 150, 255, 0.2);
+        }
+        
+        .category-color-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .category-text {
+            flex: 1;
+        }
+        
+        .category-name {
+            font-weight: bold;
+            color: #1a1a2e;
+            font-size: 0.95em;
+        }
+        
+        .category-desc {
+            font-size: 0.85em;
+            color: #555;
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+        
+        @media (max-width: 1200px) {
+            .table { grid-template-columns: repeat(12, 1fr); }
+            .f-row { grid-template-columns: repeat(12, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            h1 { font-size: 1.8em; }
+            .table { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+            .f-row { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+            .element { min-height: 80px; font-size: 0.7em; }
+            .elem-sym { font-size: 1.5em; }
+        }
+        
+        .info-button {
+            display: block;
+            margin: 40px auto 20px;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            background: linear-gradient(135deg, #00D9FF 0%, #00FF87 100%);
+            color: #0A1E3F;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 20px rgba(0, 217, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .info-button:hover {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 217, 255, 0.5);
+            filter: brightness(1.15);
+        }
+        
+        .info-button:active {
+            transform: scale(0.98);
+        }
+    </style>
+        <div class="container">
+        <h1>PERIODIC TABLE OF ELEMENTS</h1>
+        <p class="subtitle">All 118 Elements - Click for Details</p>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(135deg, #FF5252 0%, #FF6E40 100%);"></div>
+                <span>Alkali metals</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(135deg, #7986CB 0%, #5C6BC0 100%);"></div>
+                <span>Post transition metals</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(135deg, #2979F0 0%, #1565C0 100%);"></div>
+                <span>Transition metals</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(135deg, #FFAB40 0%, #FFC107 100%);"></div>
+                <span>Alkaline Earth metals</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(135deg, #00C853 0%, #00BCD4 100%);"></div>
+                <span>Lanthanides</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(135deg, #D32F2F 0%, #D81B60 100%);"></div>
+                <span>Actinides</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(135deg, #ecec06 0%, #d4d404 100%);"></div>
+                <span>Metalloids</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(135deg, #00E676 0%, #1DE9B6 100%);"></div>
+                <span>Other nonmetals</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(135deg, #FFD600 0%, #FFCA28 100%);"></div>
+                <span>Halogens</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%);"></div>
+                <span>Noble gases</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: gray;"></div>
+                <span>Unknown properties</span>
+            </div>
+        </div>
+        
+        <div class="table-wrapper">
+            <div class="table" id="table"><div class="element nonmetal" style="grid-area: 1 / 1;">
+                <div class="elem-num">1</div>
+                <div class="elem-group">1</div>
+                <div class="elem-sym">H</div>
+                <div class="elem-name">Hydrogen</div>
+                <div class="elem-mass">1.008</div>
+            </div><div class="element noble" style="grid-area: 1 / 18;">
+                <div class="elem-num">2</div>
+                <div class="elem-group">18</div>
+                <div class="elem-sym">He</div>
+                <div class="elem-name">Helium</div>
+                <div class="elem-mass">4.003</div>
+            </div><div class="element alkali" style="grid-area: 2 / 1;">
+                <div class="elem-num">3</div>
+                <div class="elem-group">1</div>
+                <div class="elem-sym">Li</div>
+                <div class="elem-name">Lithium</div>
+                <div class="elem-mass">6.941</div>
+            </div><div class="element alkaline" style="grid-area: 2 / 2;">
+                <div class="elem-num">4</div>
+                <div class="elem-group">2</div>
+                <div class="elem-sym">Be</div>
+                <div class="elem-name">Beryllium</div>
+                <div class="elem-mass">9.012</div>
+            </div><div class="element metalloid" style="grid-area: 2 / 13;">
+                <div class="elem-num">5</div>
+                <div class="elem-group">13</div>
+                <div class="elem-sym">B</div>
+                <div class="elem-name">Boron</div>
+                <div class="elem-mass">10.81</div>
+            </div><div class="element nonmetal" style="grid-area: 2 / 14;">
+                <div class="elem-num">6</div>
+                <div class="elem-group">14</div>
+                <div class="elem-sym">C</div>
+                <div class="elem-name">Carbon</div>
+                <div class="elem-mass">12.01</div>
+            </div><div class="element nonmetal" style="grid-area: 2 / 15;">
+                <div class="elem-num">7</div>
+                <div class="elem-group">15</div>
+                <div class="elem-sym">N</div>
+                <div class="elem-name">Nitrogen</div>
+                <div class="elem-mass">14.01</div>
+            </div><div class="element nonmetal" style="grid-area: 2 / 16;">
+                <div class="elem-num">8</div>
+                <div class="elem-group">16</div>
+                <div class="elem-sym">O</div>
+                <div class="elem-name">Oxygen</div>
+                <div class="elem-mass">16.00</div>
+            </div><div class="element halogen" style="grid-area: 2 / 17;">
+                <div class="elem-num">9</div>
+                <div class="elem-group">17</div>
+                <div class="elem-sym">F</div>
+                <div class="elem-name">Fluorine</div>
+                <div class="elem-mass">19.00</div>
+            </div><div class="element noble" style="grid-area: 2 / 18;">
+                <div class="elem-num">10</div>
+                <div class="elem-group">18</div>
+                <div class="elem-sym">Ne</div>
+                <div class="elem-name">Neon</div>
+                <div class="elem-mass">20.18</div>
+            </div><div class="element alkali" style="grid-area: 3 / 1;">
+                <div class="elem-num">11</div>
+                <div class="elem-group">1</div>
+                <div class="elem-sym">Na</div>
+                <div class="elem-name">Sodium</div>
+                <div class="elem-mass">22.99</div>
+            </div><div class="element alkaline" style="grid-area: 3 / 2;">
+                <div class="elem-num">12</div>
+                <div class="elem-group">2</div>
+                <div class="elem-sym">Mg</div>
+                <div class="elem-name">Magnesium</div>
+                <div class="elem-mass">24.31</div>
+            </div><div class="element post-transition" style="grid-area: 3 / 13;">
+                <div class="elem-num">13</div>
+                <div class="elem-group">13</div>
+                <div class="elem-sym">Al</div>
+                <div class="elem-name">Aluminum</div>
+                <div class="elem-mass">26.98</div>
+            </div><div class="element metalloid" style="grid-area: 3 / 14;">
+                <div class="elem-num">14</div>
+                <div class="elem-group">14</div>
+                <div class="elem-sym">Si</div>
+                <div class="elem-name">Silicon</div>
+                <div class="elem-mass">28.09</div>
+            </div><div class="element nonmetal" style="grid-area: 3 / 15;">
+                <div class="elem-num">15</div>
+                <div class="elem-group">15</div>
+                <div class="elem-sym">P</div>
+                <div class="elem-name">Phosphorus</div>
+                <div class="elem-mass">30.97</div>
+            </div><div class="element nonmetal" style="grid-area: 3 / 16;">
+                <div class="elem-num">16</div>
+                <div class="elem-group">16</div>
+                <div class="elem-sym">S</div>
+                <div class="elem-name">Sulfur</div>
+                <div class="elem-mass">32.07</div>
+            </div><div class="element halogen" style="grid-area: 3 / 17;">
+                <div class="elem-num">17</div>
+                <div class="elem-group">17</div>
+                <div class="elem-sym">Cl</div>
+                <div class="elem-name">Chlorine</div>
+                <div class="elem-mass">35.45</div>
+            </div><div class="element noble" style="grid-area: 3 / 18;">
+                <div class="elem-num">18</div>
+                <div class="elem-group">18</div>
+                <div class="elem-sym">Ar</div>
+                <div class="elem-name">Argon</div>
+                <div class="elem-mass">39.95</div>
+            </div><div class="element alkali" style="grid-area: 4 / 1;">
+                <div class="elem-num">19</div>
+                <div class="elem-group">1</div>
+                <div class="elem-sym">K</div>
+                <div class="elem-name">Potassium</div>
+                <div class="elem-mass">39.10</div>
+            </div><div class="element alkaline" style="grid-area: 4 / 2;">
+                <div class="elem-num">20</div>
+                <div class="elem-group">2</div>
+                <div class="elem-sym">Ca</div>
+                <div class="elem-name">Calcium</div>
+                <div class="elem-mass">40.08</div>
+            </div><div class="element transition" style="grid-area: 4 / 3;">
+                <div class="elem-num">21</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Sc</div>
+                <div class="elem-name">Scandium</div>
+                <div class="elem-mass">44.96</div>
+            </div><div class="element transition" style="grid-area: 4 / 4;">
+                <div class="elem-num">22</div>
+                <div class="elem-group">4</div>
+                <div class="elem-sym">Ti</div>
+                <div class="elem-name">Titanium</div>
+                <div class="elem-mass">47.87</div>
+            </div><div class="element transition" style="grid-area: 4 / 5;">
+                <div class="elem-num">23</div>
+                <div class="elem-group">5</div>
+                <div class="elem-sym">V</div>
+                <div class="elem-name">Vanadium</div>
+                <div class="elem-mass">50.94</div>
+            </div><div class="element transition" style="grid-area: 4 / 6;">
+                <div class="elem-num">24</div>
+                <div class="elem-group">6</div>
+                <div class="elem-sym">Cr</div>
+                <div class="elem-name">Chromium</div>
+                <div class="elem-mass">52.00</div>
+            </div><div class="element transition" style="grid-area: 4 / 7;">
+                <div class="elem-num">25</div>
+                <div class="elem-group">7</div>
+                <div class="elem-sym">Mn</div>
+                <div class="elem-name">Manganese</div>
+                <div class="elem-mass">54.94</div>
+            </div><div class="element transition" style="grid-area: 4 / 8;">
+                <div class="elem-num">26</div>
+                <div class="elem-group">8</div>
+                <div class="elem-sym">Fe</div>
+                <div class="elem-name">Iron</div>
+                <div class="elem-mass">55.85</div>
+            </div><div class="element transition" style="grid-area: 4 / 9;">
+                <div class="elem-num">27</div>
+                <div class="elem-group">9</div>
+                <div class="elem-sym">Co</div>
+                <div class="elem-name">Cobalt</div>
+                <div class="elem-mass">58.93</div>
+            </div><div class="element transition" style="grid-area: 4 / 10;">
+                <div class="elem-num">28</div>
+                <div class="elem-group">10</div>
+                <div class="elem-sym">Ni</div>
+                <div class="elem-name">Nickel</div>
+                <div class="elem-mass">58.69</div>
+            </div><div class="element transition" style="grid-area: 4 / 11;">
+                <div class="elem-num">29</div>
+                <div class="elem-group">11</div>
+                <div class="elem-sym">Cu</div>
+                <div class="elem-name">Copper</div>
+                <div class="elem-mass">63.55</div>
+            </div><div class="element post-transition" style="grid-area: 4 / 12;">
+                <div class="elem-num">30</div>
+                <div class="elem-group">12</div>
+                <div class="elem-sym">Zn</div>
+                <div class="elem-name">Zinc</div>
+                <div class="elem-mass">65.38</div>
+            </div><div class="element post-transition" style="grid-area: 4 / 13;">
+                <div class="elem-num">31</div>
+                <div class="elem-group">13</div>
+                <div class="elem-sym">Ga</div>
+                <div class="elem-name">Gallium</div>
+                <div class="elem-mass">69.72</div>
+            </div><div class="element metalloid" style="grid-area: 4 / 14;">
+                <div class="elem-num">32</div>
+                <div class="elem-group">14</div>
+                <div class="elem-sym">Ge</div>
+                <div class="elem-name">Germanium</div>
+                <div class="elem-mass">72.63</div>
+            </div><div class="element metalloid" style="grid-area: 4 / 15;">
+                <div class="elem-num">33</div>
+                <div class="elem-group">15</div>
+                <div class="elem-sym">As</div>
+                <div class="elem-name">Arsenic</div>
+                <div class="elem-mass">74.92</div>
+            </div><div class="element nonmetal" style="grid-area: 4 / 16;">
+                <div class="elem-num">34</div>
+                <div class="elem-group">16</div>
+                <div class="elem-sym">Se</div>
+                <div class="elem-name">Selenium</div>
+                <div class="elem-mass">78.97</div>
+            </div><div class="element halogen" style="grid-area: 4 / 17;">
+                <div class="elem-num">35</div>
+                <div class="elem-group">17</div>
+                <div class="elem-sym">Br</div>
+                <div class="elem-name">Bromine</div>
+                <div class="elem-mass">79.90</div>
+            </div><div class="element noble" style="grid-area: 4 / 18;">
+                <div class="elem-num">36</div>
+                <div class="elem-group">18</div>
+                <div class="elem-sym">Kr</div>
+                <div class="elem-name">Krypton</div>
+                <div class="elem-mass">83.80</div>
+            </div><div class="element alkali" style="grid-area: 5 / 1;">
+                <div class="elem-num">37</div>
+                <div class="elem-group">1</div>
+                <div class="elem-sym">Rb</div>
+                <div class="elem-name">Rubidium</div>
+                <div class="elem-mass">85.47</div>
+            </div><div class="element alkaline" style="grid-area: 5 / 2;">
+                <div class="elem-num">38</div>
+                <div class="elem-group">2</div>
+                <div class="elem-sym">Sr</div>
+                <div class="elem-name">Strontium</div>
+                <div class="elem-mass">87.62</div>
+            </div><div class="element transition" style="grid-area: 5 / 3;">
+                <div class="elem-num">39</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Y</div>
+                <div class="elem-name">Yttrium</div>
+                <div class="elem-mass">88.91</div>
+            </div><div class="element transition" style="grid-area: 5 / 4;">
+                <div class="elem-num">40</div>
+                <div class="elem-group">4</div>
+                <div class="elem-sym">Zr</div>
+                <div class="elem-name">Zirconium</div>
+                <div class="elem-mass">91.22</div>
+            </div><div class="element transition" style="grid-area: 5 / 5;">
+                <div class="elem-num">41</div>
+                <div class="elem-group">5</div>
+                <div class="elem-sym">Nb</div>
+                <div class="elem-name">Niobium</div>
+                <div class="elem-mass">92.91</div>
+            </div><div class="element transition" style="grid-area: 5 / 6;">
+                <div class="elem-num">42</div>
+                <div class="elem-group">6</div>
+                <div class="elem-sym">Mo</div>
+                <div class="elem-name">Molybdenum</div>
+                <div class="elem-mass">95.95</div>
+            </div><div class="element transition" style="grid-area: 5 / 7;">
+                <div class="elem-num">43</div>
+                <div class="elem-group">7</div>
+                <div class="elem-sym">Tc</div>
+                <div class="elem-name">Technetium</div>
+                <div class="elem-mass">97</div>
+            </div><div class="element transition" style="grid-area: 5 / 8;">
+                <div class="elem-num">44</div>
+                <div class="elem-group">8</div>
+                <div class="elem-sym">Ru</div>
+                <div class="elem-name">Ruthenium</div>
+                <div class="elem-mass">101.07</div>
+            </div><div class="element transition" style="grid-area: 5 / 9;">
+                <div class="elem-num">45</div>
+                <div class="elem-group">9</div>
+                <div class="elem-sym">Rh</div>
+                <div class="elem-name">Rhodium</div>
+                <div class="elem-mass">102.91</div>
+            </div><div class="element transition" style="grid-area: 5 / 10;">
+                <div class="elem-num">46</div>
+                <div class="elem-group">10</div>
+                <div class="elem-sym">Pd</div>
+                <div class="elem-name">Palladium</div>
+                <div class="elem-mass">106.42</div>
+            </div><div class="element transition" style="grid-area: 5 / 11;">
+                <div class="elem-num">47</div>
+                <div class="elem-group">11</div>
+                <div class="elem-sym">Ag</div>
+                <div class="elem-name">Silver</div>
+                <div class="elem-mass">107.87</div>
+            </div><div class="element post-transition" style="grid-area: 5 / 12;">
+                <div class="elem-num">48</div>
+                <div class="elem-group">12</div>
+                <div class="elem-sym">Cd</div>
+                <div class="elem-name">Cadmium</div>
+                <div class="elem-mass">112.41</div>
+            </div><div class="element post-transition metals" style="grid-area: 5 / 13;">
+                <div class="elem-num">49</div>
+                <div class="elem-group">13</div>
+                <div class="elem-sym">In</div>
+                <div class="elem-name">Indium</div>
+                <div class="elem-mass">114.82</div>
+            </div><div class="element post-transition metals" style="grid-area: 5 / 14;">
+                <div class="elem-num">50</div>
+                <div class="elem-group">14</div>
+                <div class="elem-sym">Sn</div>
+                <div class="elem-name">Tin</div>
+                <div class="elem-mass">118.71</div>
+            </div><div class="element metalloid" style="grid-area: 5 / 15;">
+                <div class="elem-num">51</div>
+                <div class="elem-group">15</div>
+                <div class="elem-sym">Sb</div>
+                <div class="elem-name">Antimony</div>
+                <div class="elem-mass">121.76</div>
+            </div><div class="element metalloid" style="grid-area: 5 / 16;">
+                <div class="elem-num">52</div>
+                <div class="elem-group">16</div>
+                <div class="elem-sym">Te</div>
+                <div class="elem-name">Tellurium</div>
+                <div class="elem-mass">127.60</div>
+            </div><div class="element halogen" style="grid-area: 5 / 17;">
+                <div class="elem-num">53</div>
+                <div class="elem-group">17</div>
+                <div class="elem-sym">I</div>
+                <div class="elem-name">Iodine</div>
+                <div class="elem-mass">126.90</div>
+            </div><div class="element noble" style="grid-area: 5 / 18;">
+                <div class="elem-num">54</div>
+                <div class="elem-group">18</div>
+                <div class="elem-sym">Xe</div>
+                <div class="elem-name">Xenon</div>
+                <div class="elem-mass">131.29</div>
+            </div><div class="element alkali" style="grid-area: 6 / 1;">
+                <div class="elem-num">55</div>
+                <div class="elem-group">1</div>
+                <div class="elem-sym">Cs</div>
+                <div class="elem-name">Cesium</div>
+                <div class="elem-mass">132.91</div>
+            </div><div class="element alkaline" style="grid-area: 6 / 2;">
+                <div class="elem-num">56</div>
+                <div class="elem-group">2</div>
+                <div class="elem-sym">Ba</div>
+                <div class="elem-name">Barium</div>
+                <div class="elem-mass">137.33</div>
+            </div><div class="element transition" style="grid-area: 6 / 4;">
+                <div class="elem-num">72</div>
+                <div class="elem-group">4</div>
+                <div class="elem-sym">Hf</div>
+                <div class="elem-name">Hafnium</div>
+                <div class="elem-mass">178.49</div>
+            </div><div class="element transition" style="grid-area: 6 / 5;">
+                <div class="elem-num">73</div>
+                <div class="elem-group">5</div>
+                <div class="elem-sym">Ta</div>
+                <div class="elem-name">Tantalum</div>
+                <div class="elem-mass">180.95</div>
+            </div><div class="element transition" style="grid-area: 6 / 6;">
+                <div class="elem-num">74</div>
+                <div class="elem-group">6</div>
+                <div class="elem-sym">W</div>
+                <div class="elem-name">Tungsten</div>
+                <div class="elem-mass">183.84</div>
+            </div><div class="element transition" style="grid-area: 6 / 7;">
+                <div class="elem-num">75</div>
+                <div class="elem-group">7</div>
+                <div class="elem-sym">Re</div>
+                <div class="elem-name">Rhenium</div>
+                <div class="elem-mass">186.21</div>
+            </div><div class="element transition" style="grid-area: 6 / 8;">
+                <div class="elem-num">76</div>
+                <div class="elem-group">8</div>
+                <div class="elem-sym">Os</div>
+                <div class="elem-name">Osmium</div>
+                <div class="elem-mass">190.23</div>
+            </div><div class="element transition" style="grid-area: 6 / 9;">
+                <div class="elem-num">77</div>
+                <div class="elem-group">9</div>
+                <div class="elem-sym">Ir</div>
+                <div class="elem-name">Iridium</div>
+                <div class="elem-mass">192.22</div>
+            </div><div class="element transition" style="grid-area: 6 / 10;">
+                <div class="elem-num">78</div>
+                <div class="elem-group">10</div>
+                <div class="elem-sym">Pt</div>
+                <div class="elem-name">Platinum</div>
+                <div class="elem-mass">195.08</div>
+            </div><div class="element transition" style="grid-area: 6 / 11;">
+                <div class="elem-num">79</div>
+                <div class="elem-group">11</div>
+                <div class="elem-sym">Au</div>
+                <div class="elem-name">Gold</div>
+                <div class="elem-mass">196.97</div>
+            </div><div class="element post-transition" style="grid-area: 6 / 12;">
+                <div class="elem-num">80</div>
+                <div class="elem-group">12</div>
+                <div class="elem-sym">Hg</div>
+                <div class="elem-name">Mercury</div>
+                <div class="elem-mass">200.59</div>
+            </div><div class="element post-transition" style="grid-area: 6 / 13;">
+                <div class="elem-num">81</div>
+                <div class="elem-group">13</div>
+                <div class="elem-sym">Tl</div>
+                <div class="elem-name">Thallium</div>
+                <div class="elem-mass">204.38</div>
+            </div><div class="element post-transition" style="grid-area: 6 / 14;">
+                <div class="elem-num">82</div>
+                <div class="elem-group">14</div>
+                <div class="elem-sym">Pb</div>
+                <div class="elem-name">Lead</div>
+                <div class="elem-mass">207.2</div>
+            </div><div class="element post-transition" style="grid-area: 6 / 15;">
+                <div class="elem-num">83</div>
+                <div class="elem-group">15</div>
+                <div class="elem-sym">Bi</div>
+                <div class="elem-name">Bismuth</div>
+                <div class="elem-mass">208.98</div>
+            </div><div class="element post-transition" style="grid-area: 6 / 16;">
+                <div class="elem-num">84</div>
+                <div class="elem-group">16</div>
+                <div class="elem-sym">Po</div>
+                <div class="elem-name">Polonium</div>
+                <div class="elem-mass">209</div>
+            </div><div class="element halogen" style="grid-area: 6 / 17;">
+                <div class="elem-num">85</div>
+                <div class="elem-group">17</div>
+                <div class="elem-sym">At</div>
+                <div class="elem-name">Astatine</div>
+                <div class="elem-mass">210</div>
+            </div><div class="element noble" style="grid-area: 6 / 18;">
+                <div class="elem-num">86</div>
+                <div class="elem-group">18</div>
+                <div class="elem-sym">Rn</div>
+                <div class="elem-name">Radon</div>
+                <div class="elem-mass">222</div>
+            </div><div class="element alkali" style="grid-area: 7 / 1;">
+                <div class="elem-num">87</div>
+                <div class="elem-group">1</div>
+                <div class="elem-sym">Fr</div>
+                <div class="elem-name">Francium</div>
+                <div class="elem-mass">223</div>
+            </div><div class="element alkaline" style="grid-area: 7 / 2;">
+                <div class="elem-num">88</div>
+                <div class="elem-group">2</div>
+                <div class="elem-sym">Ra</div>
+                <div class="elem-name">Radium</div>
+                <div class="elem-mass">226</div>
+            </div><div class="element transition" style="grid-area: 7 / 4;">
+                <div class="elem-num">104</div>
+                <div class="elem-group">4</div>
+                <div class="elem-sym">Rf</div>
+                <div class="elem-name">Rutherfordium</div>
+                <div class="elem-mass">267</div>
+            </div><div class="element transition" style="grid-area: 7 / 5;">
+                <div class="elem-num">105</div>
+                <div class="elem-group">5</div>
+                <div class="elem-sym">Db</div>
+                <div class="elem-name">Dubnium</div>
+                <div class="elem-mass">268</div>
+            </div><div class="element transition" style="grid-area: 7 / 6;">
+                <div class="elem-num">106</div>
+                <div class="elem-group">6</div>
+                <div class="elem-sym">Sg</div>
+                <div class="elem-name">Seaborgium</div>
+                <div class="elem-mass">271</div>
+            </div><div class="element transition" style="grid-area: 7 / 7;">
+                <div class="elem-num">107</div>
+                <div class="elem-group">7</div>
+                <div class="elem-sym">Bh</div>
+                <div class="elem-name">Bohrium</div>
+                <div class="elem-mass">272</div>
+            </div><div class="element transition" style="grid-area: 7 / 8;">
+                <div class="elem-num">108</div>
+                <div class="elem-group">8</div>
+                <div class="elem-sym">Hs</div>
+                <div class="elem-name">Hassium</div>
+                <div class="elem-mass">270</div>
+            </div><div class="element unknown properties" style="grid-area: 7 / 9;">
+                <div class="elem-num">109</div>
+                <div class="elem-group">9</div>
+                <div class="elem-sym">Mt</div>
+                <div class="elem-name">Meitnerium</div>
+                <div class="elem-mass">276</div>
+            </div><div class="element unknown properties" style="grid-area: 7 / 10;">
+                <div class="elem-num">110</div>
+                <div class="elem-group">10</div>
+                <div class="elem-sym">Ds</div>
+                <div class="elem-name">Darmstadium</div>
+                <div class="elem-mass">281</div>
+            </div><div class="element unknown properties" style="grid-area: 7 / 11;">
+                <div class="elem-num">111</div>
+                <div class="elem-group">11</div>
+                <div class="elem-sym">Rg</div>
+                <div class="elem-name">Roentgenium</div>
+                <div class="elem-mass">280</div>
+            </div><div class="element post-transition" style="grid-area: 7 / 12;">
+                <div class="elem-num">112</div>
+                <div class="elem-group">12</div>
+                <div class="elem-sym">Cn</div>
+                <div class="elem-name">Copernicium</div>
+                <div class="elem-mass">285</div>
+            </div><div class="element unknown properties" style="grid-area: 7 / 13;">
+                <div class="elem-num">113</div>
+                <div class="elem-group">13</div>
+                <div class="elem-sym">Nh</div>
+                <div class="elem-name">Nihonium</div>
+                <div class="elem-mass">286</div>
+            </div><div class="element unknown properties" style="grid-area: 7 / 14;">
+                <div class="elem-num">114</div>
+                <div class="elem-group">14</div>
+                <div class="elem-sym">Fl</div>
+                <div class="elem-name">Flerovium</div>
+                <div class="elem-mass">289</div>
+            </div><div class="element unknown properties" style="grid-area: 7 / 15;">
+                <div class="elem-num">115</div>
+                <div class="elem-group">15</div>
+                <div class="elem-sym">Mc</div>
+                <div class="elem-name">Moscovium</div>
+                <div class="elem-mass">288</div>
+            </div><div class="element unknown properties" style="grid-area: 7 / 16;">
+                <div class="elem-num">116</div>
+                <div class="elem-group">16</div>
+                <div class="elem-sym">Lv</div>
+                <div class="elem-name">Livermorium</div>
+                <div class="elem-mass">293</div>
+            </div><div class="element unknown properties" style="grid-area: 7 / 17;">
+                <div class="elem-num">117</div>
+                <div class="elem-group">17</div>
+                <div class="elem-sym">Ts</div>
+                <div class="elem-name">Tennessine</div>
+                <div class="elem-mass">294</div>
+            </div><div class="element unknown properties" style="grid-area: 7 / 18;">
+                <div class="elem-num">118</div>
+                <div class="elem-group">18</div>
+                <div class="elem-sym">Og</div>
+                <div class="elem-name">Oganesson</div>
+                <div class="elem-mass">294</div>
+            </div></div>
+        </div>
+        
+        <div class="f-section">
+            <div class="f-title">Lanthanides</div>
+            <div class="f-row" id="lanthanides"><div class="element lanthanide" style="grid-area: auto / 1;">
+                <div class="elem-num">57</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">La</div>
+                <div class="elem-name">Lanthanum</div>
+                <div class="elem-mass">138.91</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 2;">
+                <div class="elem-num">58</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Ce</div>
+                <div class="elem-name">Cerium</div>
+                <div class="elem-mass">140.12</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 3;">
+                <div class="elem-num">59</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Pr</div>
+                <div class="elem-name">Praseodymium</div>
+                <div class="elem-mass">140.91</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 4;">
+                <div class="elem-num">60</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Nd</div>
+                <div class="elem-name">Neodymium</div>
+                <div class="elem-mass">144.24</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 5;">
+                <div class="elem-num">61</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Pm</div>
+                <div class="elem-name">Promethium</div>
+                <div class="elem-mass">145</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 6;">
+                <div class="elem-num">62</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Sm</div>
+                <div class="elem-name">Samarium</div>
+                <div class="elem-mass">150.36</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 7;">
+                <div class="elem-num">63</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Eu</div>
+                <div class="elem-name">Europium</div>
+                <div class="elem-mass">151.96</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 8;">
+                <div class="elem-num">64</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Gd</div>
+                <div class="elem-name">Gadolinium</div>
+                <div class="elem-mass">157.25</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 9;">
+                <div class="elem-num">65</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Tb</div>
+                <div class="elem-name">Terbium</div>
+                <div class="elem-mass">158.93</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 10;">
+                <div class="elem-num">66</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Dy</div>
+                <div class="elem-name">Dysprosium</div>
+                <div class="elem-mass">162.50</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 11;">
+                <div class="elem-num">67</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Ho</div>
+                <div class="elem-name">Holmium</div>
+                <div class="elem-mass">164.93</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 12;">
+                <div class="elem-num">68</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Er</div>
+                <div class="elem-name">Erbium</div>
+                <div class="elem-mass">167.26</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 13;">
+                <div class="elem-num">69</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Tm</div>
+                <div class="elem-name">Thulium</div>
+                <div class="elem-mass">168.93</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 14;">
+                <div class="elem-num">70</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Yb</div>
+                <div class="elem-name">Ytterbium</div>
+                <div class="elem-mass">173.05</div>
+            </div><div class="element lanthanide" style="grid-area: auto / 15;">
+                <div class="elem-num">71</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Lu</div>
+                <div class="elem-name">Lutetium</div>
+                <div class="elem-mass">174.97</div>
+            </div></div>
+        </div>
+        
+        <div class="f-section">
+            <div class="f-title">Actinides</div>
+            <div class="f-row" id="actinides"><div class="element actinide" style="grid-area: auto / 1;">
+                <div class="elem-num">89</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Ac</div>
+                <div class="elem-name">Actinium</div>
+                <div class="elem-mass">227</div>
+            </div><div class="element actinide" style="grid-area: auto / 2;">
+                <div class="elem-num">90</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Th</div>
+                <div class="elem-name">Thorium</div>
+                <div class="elem-mass">232.04</div>
+            </div><div class="element actinide" style="grid-area: auto / 3;">
+                <div class="elem-num">91</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Pa</div>
+                <div class="elem-name">Protactinium</div>
+                <div class="elem-mass">231.04</div>
+            </div><div class="element actinide" style="grid-area: auto / 4;">
+                <div class="elem-num">92</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">U</div>
+                <div class="elem-name">Uranium</div>
+                <div class="elem-mass">238.03</div>
+            </div><div class="element actinide" style="grid-area: auto / 5;">
+                <div class="elem-num">93</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Np</div>
+                <div class="elem-name">Neptunium</div>
+                <div class="elem-mass">237</div>
+            </div><div class="element actinide" style="grid-area: auto / 6;">
+                <div class="elem-num">94</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Pu</div>
+                <div class="elem-name">Plutonium</div>
+                <div class="elem-mass">244</div>
+            </div><div class="element actinide" style="grid-area: auto / 7;">
+                <div class="elem-num">95</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Am</div>
+                <div class="elem-name">Americium</div>
+                <div class="elem-mass">243</div>
+            </div><div class="element actinide" style="grid-area: auto / 8;">
+                <div class="elem-num">96</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Cm</div>
+                <div class="elem-name">Curium</div>
+                <div class="elem-mass">247</div>
+            </div><div class="element actinide" style="grid-area: auto / 9;">
+                <div class="elem-num">97</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Bk</div>
+                <div class="elem-name">Berkelium</div>
+                <div class="elem-mass">247</div>
+            </div><div class="element actinide" style="grid-area: auto / 10;">
+                <div class="elem-num">98</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Cf</div>
+                <div class="elem-name">Californium</div>
+                <div class="elem-mass">251</div>
+            </div><div class="element actinide" style="grid-area: auto / 11;">
+                <div class="elem-num">99</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Es</div>
+                <div class="elem-name">Einsteinium</div>
+                <div class="elem-mass">252</div>
+            </div><div class="element actinide" style="grid-area: auto / 12;">
+                <div class="elem-num">100</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Fm</div>
+                <div class="elem-name">Fermium</div>
+                <div class="elem-mass">257</div>
+            </div><div class="element actinide" style="grid-area: auto / 13;">
+                <div class="elem-num">101</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Md</div>
+                <div class="elem-name">Mendelevium</div>
+                <div class="elem-mass">258</div>
+            </div><div class="element actinide" style="grid-area: auto / 14;">
+                <div class="elem-num">102</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">No</div>
+                <div class="elem-name">Nobelium</div>
+                <div class="elem-mass">259</div>
+            </div><div class="element actinide" style="grid-area: auto / 15;">
+                <div class="elem-num">103</div>
+                <div class="elem-group">3</div>
+                <div class="elem-sym">Lr</div>
+                <div class="elem-name">Lawrencium</div>
+                <div class="elem-mass">262</div>
+            </div></div>
+        </div>
+        
+        <button class="info-button" onclick="showTableInfo()">📊 Table Properties</button>
+        
+    
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">×</button>
+            <div class="modal-header">
+                <div class="modal-sym" id="modalSym"></div>
+                <div class="modal-name" id="modalName"></div>
+            </div>
+            <div class="modal-info" id="modalInfo"></div>
+        </div>
+    </div>
+    
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeTableInfo()">×</button>
+            <div class="modal-header">
+                <div class="modal-name" style="text-align: center; font-size: 2em; margin-bottom: 10px;">📊 Periodic Table Properties</div>
+            </div>
+            <div class="modal-info" id="tableInfoContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const elements = [
+            {n:1,s:'H',nm:'Hydrogen',m:'1.008',c:'1s¹',t:'nonmetal',p:1,g:1},
+            {n:2,s:'He',nm:'Helium',m:'4.003',c:'1s²',t:'noble',p:1,g:18},
+            {n:3,s:'Li',nm:'Lithium',m:'6.941',c:'[He] 2s¹',t:'alkali',p:2,g:1},
+            {n:4,s:'Be',nm:'Beryllium',m:'9.012',c:'[He] 2s²',t:'alkaline',p:2,g:2},
+            {n:5,s:'B',nm:'Boron',m:'10.81',c:'[He] 2s² 2p¹',t:'metalloid',p:2,g:13},
+            {n:6,s:'C',nm:'Carbon',m:'12.01',c:'[He] 2s² 2p²',t:'nonmetal',p:2,g:14},
+            {n:7,s:'N',nm:'Nitrogen',m:'14.01',c:'[He] 2s² 2p³',t:'nonmetal',p:2,g:15},
+            {n:8,s:'O',nm:'Oxygen',m:'16.00',c:'[He] 2s² 2p⁴',t:'nonmetal',p:2,g:16},
+            {n:9,s:'F',nm:'Fluorine',m:'19.00',c:'[He] 2s² 2p⁵',t:'halogen',p:2,g:17},
+            {n:10,s:'Ne',nm:'Neon',m:'20.18',c:'[He] 2s² 2p⁶',t:'noble',p:2,g:18},
+            {n:11,s:'Na',nm:'Sodium',m:'22.99',c:'[Ne] 3s¹',t:'alkali',p:3,g:1},
+            {n:12,s:'Mg',nm:'Magnesium',m:'24.31',c:'[Ne] 3s²',t:'alkaline',p:3,g:2},
+            {n:13,s:'Al',nm:'Aluminum',m:'26.98',c:'[Ne] 3s² 3p¹',t:'post-transition',p:3,g:13},
+            {n:14,s:'Si',nm:'Silicon',m:'28.09',c:'[Ne] 3s² 3p²',t:'metalloid',p:3,g:14},
+            {n:15,s:'P',nm:'Phosphorus',m:'30.97',c:'[Ne] 3s² 3p³',t:'nonmetal',p:3,g:15},
+            {n:16,s:'S',nm:'Sulfur',m:'32.07',c:'[Ne] 3s² 3p⁴',t:'nonmetal',p:3,g:16},
+            {n:17,s:'Cl',nm:'Chlorine',m:'35.45',c:'[Ne] 3s² 3p⁵',t:'halogen',p:3,g:17},
+            {n:18,s:'Ar',nm:'Argon',m:'39.95',c:'[Ne] 3s² 3p⁶',t:'noble',p:3,g:18},
+            {n:19,s:'K',nm:'Potassium',m:'39.10',c:'[Ar] 4s¹',t:'alkali',p:4,g:1},
+            {n:20,s:'Ca',nm:'Calcium',m:'40.08',c:'[Ar] 4s²',t:'alkaline',p:4,g:2},
+            {n:21,s:'Sc',nm:'Scandium',m:'44.96',c:'[Ar] 3d¹ 4s²',t:'transition',p:4,g:3},
+            {n:22,s:'Ti',nm:'Titanium',m:'47.87',c:'[Ar] 3d² 4s²',t:'transition',p:4,g:4},
+            {n:23,s:'V',nm:'Vanadium',m:'50.94',c:'[Ar] 3d³ 4s²',t:'transition',p:4,g:5},
+            {n:24,s:'Cr',nm:'Chromium',m:'52.00',c:'[Ar] 3d⁵ 4s¹',t:'transition',p:4,g:6},
+            {n:25,s:'Mn',nm:'Manganese',m:'54.94',c:'[Ar] 3d⁵ 4s²',t:'transition',p:4,g:7},
+            {n:26,s:'Fe',nm:'Iron',m:'55.85',c:'[Ar] 3d⁶ 4s²',t:'transition',p:4,g:8},
+            {n:27,s:'Co',nm:'Cobalt',m:'58.93',c:'[Ar] 3d⁷ 4s²',t:'transition',p:4,g:9},
+            {n:28,s:'Ni',nm:'Nickel',m:'58.69',c:'[Ar] 3d⁸ 4s²',t:'transition',p:4,g:10},
+            {n:29,s:'Cu',nm:'Copper',m:'63.55',c:'[Ar] 3d¹⁰ 4s¹',t:'transition',p:4,g:11},
+            {n:30,s:'Zn',nm:'Zinc',m:'65.38',c:'[Ar] 3d¹⁰ 4s²',t:'post-transition',p:4,g:12},
+            {n:31,s:'Ga',nm:'Gallium',m:'69.72',c:'[Ar] 3d¹⁰ 4s² 4p¹',t:'post-transition',p:4,g:13},
+            {n:32,s:'Ge',nm:'Germanium',m:'72.63',c:'[Ar] 3d¹⁰ 4s² 4p²',t:'metalloid',p:4,g:14},
+            {n:33,s:'As',nm:'Arsenic',m:'74.92',c:'[Ar] 3d¹⁰ 4s² 4p³',t:'metalloid',p:4,g:15},
+            {n:34,s:'Se',nm:'Selenium',m:'78.97',c:'[Ar] 3d¹⁰ 4s² 4p⁴',t:'nonmetal',p:4,g:16},
+            {n:35,s:'Br',nm:'Bromine',m:'79.90',c:'[Ar] 3d¹⁰ 4s² 4p⁵',t:'halogen',p:4,g:17},
+            {n:36,s:'Kr',nm:'Krypton',m:'83.80',c:'[Ar] 3d¹⁰ 4s² 4p⁶',t:'noble',p:4,g:18},
+            {n:37,s:'Rb',nm:'Rubidium',m:'85.47',c:'[Kr] 5s¹',t:'alkali',p:5,g:1},
+            {n:38,s:'Sr',nm:'Strontium',m:'87.62',c:'[Kr] 5s²',t:'alkaline',p:5,g:2},
+            {n:39,s:'Y',nm:'Yttrium',m:'88.91',c:'[Kr] 4d¹ 5s²',t:'transition',p:5,g:3},
+            {n:40,s:'Zr',nm:'Zirconium',m:'91.22',c:'[Kr] 4d² 5s²',t:'transition',p:5,g:4},
+            {n:41,s:'Nb',nm:'Niobium',m:'92.91',c:'[Kr] 4d⁴ 5s¹',t:'transition',p:5,g:5},
+            {n:42,s:'Mo',nm:'Molybdenum',m:'95.95',c:'[Kr] 4d⁵ 5s¹',t:'transition',p:5,g:6},
+            {n:43,s:'Tc',nm:'Technetium',m:'97',c:'[Kr] 4d⁵ 5s²',t:'transition',p:5,g:7},
+            {n:44,s:'Ru',nm:'Ruthenium',m:'101.07',c:'[Kr] 4d⁷ 5s¹',t:'transition',p:5,g:8},
+            {n:45,s:'Rh',nm:'Rhodium',m:'102.91',c:'[Kr] 4d⁸ 5s¹',t:'transition',p:5,g:9},
+            {n:46,s:'Pd',nm:'Palladium',m:'106.42',c:'[Kr] 4d¹⁰',t:'transition',p:5,g:10},
+            {n:47,s:'Ag',nm:'Silver',m:'107.87',c:'[Kr] 4d¹⁰ 5s¹',t:'transition',p:5,g:11},
+            {n:48,s:'Cd',nm:'Cadmium',m:'112.41',c:'[Kr] 4d¹⁰ 5s²',t:'post-transition',p:5,g:12},
+            {n:49,s:'In',nm:'Indium',m:'114.82',c:'[Kr] 4d¹⁰ 5s² 5p¹',t:'post-transition metals',p:5,g:13},
+            {n:50,s:'Sn',nm:'Tin',m:'118.71',c:'[Kr] 4d¹⁰ 5s² 5p²',t:'post-transition metals',p:5,g:14},
+            {n:51,s:'Sb',nm:'Antimony',m:'121.76',c:'[Kr] 4d¹⁰ 5s² 5p³',t:'metalloid',p:5,g:15},
+            {n:52,s:'Te',nm:'Tellurium',m:'127.60',c:'[Kr] 4d¹⁰ 5s² 5p⁴',t:'metalloid',p:5,g:16},
+            {n:53,s:'I',nm:'Iodine',m:'126.90',c:'[Kr] 4d¹⁰ 5s² 5p⁵',t:'halogen',p:5,g:17},
+            {n:54,s:'Xe',nm:'Xenon',m:'131.29',c:'[Kr] 4d¹⁰ 5s² 5p⁶',t:'noble',p:5,g:18},
+            {n:55,s:'Cs',nm:'Cesium',m:'132.91',c:'[Xe] 6s¹',t:'alkali',p:6,g:1},
+            {n:56,s:'Ba',nm:'Barium',m:'137.33',c:'[Xe] 6s²',t:'alkaline',p:6,g:2},
+            {n:72,s:'Hf',nm:'Hafnium',m:'178.49',c:'[Xe] 4f¹⁴ 5d² 6s²',t:'transition',p:6,g:4},
+            {n:73,s:'Ta',nm:'Tantalum',m:'180.95',c:'[Xe] 4f¹⁴ 5d³ 6s²',t:'transition',p:6,g:5},
+            {n:74,s:'W',nm:'Tungsten',m:'183.84',c:'[Xe] 4f¹⁴ 5d⁴ 6s²',t:'transition',p:6,g:6},
+            {n:75,s:'Re',nm:'Rhenium',m:'186.21',c:'[Xe] 4f¹⁴ 5d⁵ 6s²',t:'transition',p:6,g:7},
+            {n:76,s:'Os',nm:'Osmium',m:'190.23',c:'[Xe] 4f¹⁴ 5d⁶ 6s²',t:'transition',p:6,g:8},
+            {n:77,s:'Ir',nm:'Iridium',m:'192.22',c:'[Xe] 4f¹⁴ 5d⁷ 6s²',t:'transition',p:6,g:9},
+            {n:78,s:'Pt',nm:'Platinum',m:'195.08',c:'[Xe] 4f¹⁴ 5d⁹ 6s¹',t:'transition',p:6,g:10},
+            {n:79,s:'Au',nm:'Gold',m:'196.97',c:'[Xe] 4f¹⁴ 5d¹⁰ 6s¹',t:'transition',p:6,g:11},
+            {n:80,s:'Hg',nm:'Mercury',m:'200.59',c:'[Xe] 4f¹⁴ 5d¹⁰ 6s²',t:'post-transition',p:6,g:12},
+            {n:81,s:'Tl',nm:'Thallium',m:'204.38',c:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹',t:'post-transition',p:6,g:13},
+            {n:82,s:'Pb',nm:'Lead',m:'207.2',c:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²',t:'post-transition',p:6,g:14},
+            {n:83,s:'Bi',nm:'Bismuth',m:'208.98',c:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³',t:'post-transition',p:6,g:15},
+            {n:84,s:'Po',nm:'Polonium',m:'209',c:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴',t:'post-transition',p:6,g:16},
+            {n:85,s:'At',nm:'Astatine',m:'210',c:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵',t:'halogen',p:6,g:17},
+            {n:86,s:'Rn',nm:'Radon',m:'222',c:'[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶',t:'noble',p:6,g:18},
+            {n:87,s:'Fr',nm:'Francium',m:'223',c:'[Rn] 7s¹',t:'alkali',p:7,g:1},
+            {n:88,s:'Ra',nm:'Radium',m:'226',c:'[Rn] 7s²',t:'alkaline',p:7,g:2},
+            {n:104,s:'Rf',nm:'Rutherfordium',m:'267',c:'[Rn] 5f¹⁴ 6d² 7s²',t:'transition',p:7,g:4},
+            {n:105,s:'Db',nm:'Dubnium',m:'268',c:'[Rn] 5f¹⁴ 6d³ 7s²',t:'transition',p:7,g:5},
+            {n:106,s:'Sg',nm:'Seaborgium',m:'271',c:'[Rn] 5f¹⁴ 6d⁴ 7s²',t:'transition',p:7,g:6},
+            {n:107,s:'Bh',nm:'Bohrium',m:'272',c:'[Rn] 5f¹⁴ 6d⁵ 7s²',t:'transition',p:7,g:7},
+            {n:108,s:'Hs',nm:'Hassium',m:'270',c:'[Rn] 5f¹⁴ 6d⁶ 7s²',t:'transition',p:7,g:8},
+            {n:109,s:'Mt',nm:'Meitnerium',m:'276',c:'[Rn] 5f¹⁴ 6d⁷ 7s²',t:'unknown properties',p:7,g:9},
+            {n:110,s:'Ds',nm:'Darmstadium',m:'281',c:'[Rn] 5f¹⁴ 6d⁹ 7s¹',t:'unknown properties',p:7,g:10},
+            {n:111,s:'Rg',nm:'Roentgenium',m:'280',c:'[Rn] 5f¹⁴ 6d¹⁰ 7s¹',t:'unknown properties',p:7,g:11},
+            {n:112,s:'Cn',nm:'Copernicium',m:'285',c:'[Rn] 5f¹⁴ 6d¹⁰ 7s²',t:'post-transition',p:7,g:12},
+            {n:113,s:'Nh',nm:'Nihonium',m:'286',c:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹',t:'unknown properties',p:7,g:13},
+            {n:114,s:'Fl',nm:'Flerovium',m:'289',c:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²',t:'unknown properties',p:7,g:14},
+            {n:115,s:'Mc',nm:'Moscovium',m:'288',c:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³',t:'unknown properties',p:7,g:15},
+            {n:116,s:'Lv',nm:'Livermorium',m:'293',c:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴',t:'unknown properties',p:7,g:16},
+            {n:117,s:'Ts',nm:'Tennessine',m:'294',c:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵',t:'unknown properties',p:7,g:17},
+            {n:118,s:'Og',nm:'Oganesson',m:'294',c:'[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶',t:'unknown properties',p:7,g:18},
+            {n:57,s:'La',nm:'Lanthanum',m:'138.91',c:'[Xe] 5d¹ 6s²',t:'lanthanide',p:6,g:3},
+            {n:58,s:'Ce',nm:'Cerium',m:'140.12',c:'[Xe] 4f¹ 5d¹ 6s²',t:'lanthanide',p:6,g:3},
+            {n:59,s:'Pr',nm:'Praseodymium',m:'140.91',c:'[Xe] 4f³ 6s²',t:'lanthanide',p:6,g:3},
+            {n:60,s:'Nd',nm:'Neodymium',m:'144.24',c:'[Xe] 4f⁴ 6s²',t:'lanthanide',p:6,g:3},
+            {n:61,s:'Pm',nm:'Promethium',m:'145',c:'[Xe] 4f⁵ 6s²',t:'lanthanide',p:6,g:3},
+            {n:62,s:'Sm',nm:'Samarium',m:'150.36',c:'[Xe] 4f⁶ 6s²',t:'lanthanide',p:6,g:3},
+            {n:63,s:'Eu',nm:'Europium',m:'151.96',c:'[Xe] 4f⁷ 6s²',t:'lanthanide',p:6,g:3},
+            {n:64,s:'Gd',nm:'Gadolinium',m:'157.25',c:'[Xe] 4f⁷ 5d¹ 6s²',t:'lanthanide',p:6,g:3},
+            {n:65,s:'Tb',nm:'Terbium',m:'158.93',c:'[Xe] 4f⁹ 6s²',t:'lanthanide',p:6,g:3},
+            {n:66,s:'Dy',nm:'Dysprosium',m:'162.50',c:'[Xe] 4f¹⁰ 6s²',t:'lanthanide',p:6,g:3},
+            {n:67,s:'Ho',nm:'Holmium',m:'164.93',c:'[Xe] 4f¹¹ 6s²',t:'lanthanide',p:6,g:3},
+            {n:68,s:'Er',nm:'Erbium',m:'167.26',c:'[Xe] 4f¹² 6s²',t:'lanthanide',p:6,g:3},
+            {n:69,s:'Tm',nm:'Thulium',m:'168.93',c:'[Xe] 4f¹³ 6s²',t:'lanthanide',p:6,g:3},
+            {n:70,s:'Yb',nm:'Ytterbium',m:'173.05',c:'[Xe] 4f¹⁴ 6s²',t:'lanthanide',p:6,g:3},
+            {n:71,s:'Lu',nm:'Lutetium',m:'174.97',c:'[Xe] 4f¹⁴ 5d¹ 6s²',t:'lanthanide',p:6,g:3},
+            {n:89,s:'Ac',nm:'Actinium',m:'227',c:'[Rn] 6d¹ 7s²',t:'actinide',p:7,g:3},
+            {n:90,s:'Th',nm:'Thorium',m:'232.04',c:'[Rn] 6d² 7s²',t:'actinide',p:7,g:3},
+            {n:91,s:'Pa',nm:'Protactinium',m:'231.04',c:'[Rn] 5f² 6d¹ 7s²',t:'actinide',p:7,g:3},
+            {n:92,s:'U',nm:'Uranium',m:'238.03',c:'[Rn] 5f³ 6d¹ 7s²',t:'actinide',p:7,g:3},
+            {n:93,s:'Np',nm:'Neptunium',m:'237',c:'[Rn] 5f⁴ 6d¹ 7s²',t:'actinide',p:7,g:3},
+            {n:94,s:'Pu',nm:'Plutonium',m:'244',c:'[Rn] 5f⁶ 7s²',t:'actinide',p:7,g:3},
+            {n:95,s:'Am',nm:'Americium',m:'243',c:'[Rn] 5f⁷ 7s²',t:'actinide',p:7,g:3},
+            {n:96,s:'Cm',nm:'Curium',m:'247',c:'[Rn] 5f⁷ 6d¹ 7s²',t:'actinide',p:7,g:3},
+            {n:97,s:'Bk',nm:'Berkelium',m:'247',c:'[Rn] 5f⁹ 7s²',t:'actinide',p:7,g:3},
+            {n:98,s:'Cf',nm:'Californium',m:'251',c:'[Rn] 5f¹⁰ 7s²',t:'actinide',p:7,g:3},
+            {n:99,s:'Es',nm:'Einsteinium',m:'252',c:'[Rn] 5f¹¹ 7s²',t:'actinide',p:7,g:3},
+            {n:100,s:'Fm',nm:'Fermium',m:'257',c:'[Rn] 5f¹² 7s²',t:'actinide',p:7,g:3},
+            {n:101,s:'Md',nm:'Mendelevium',m:'258',c:'[Rn] 5f¹³ 7s²',t:'actinide',p:7,g:3},
+            {n:102,s:'No',nm:'Nobelium',m:'259',c:'[Rn] 5f¹⁴ 7s²',t:'actinide',p:7,g:3},
+            {n:103,s:'Lr',nm:'Lawrencium',m:'262',c:'[Rn] 5f¹⁴ 6d¹ 7s²',t:'actinide',p:7,g:3}
+        ];
+        
+        function makeElement(e) {
+            const el = document.createElement('div');
+            el.className = `element ${e.t}`;
+            el.style.gridColumn = e.g;
+            el.style.gridRow = e.p;
+            el.innerHTML = `
+                <div class="elem-num">${e.n}</div>
+                <div class="elem-group">${e.g}</div>
+                <div class="elem-sym">${e.s}</div>
+                <div class="elem-name">${e.nm}</div>
+                <div class="elem-mass">${e.m}</div>
+            `;
+            el.onclick = () => showModal(e);
+            return el;
+        }
+        
+        function getBlock(config) {
+            // Determine block based on electron configuration
+            if (config.includes('6p') || config.includes('7p') || config.includes('5p') || config.includes('4p') || config.includes('3p') || config.includes('2p')) {
+                return 'p-block';
+            } else if (config.includes('5f') || config.includes('4f')) {
+                return 'f-block';
+            } else if (config.includes('5d') || config.includes('4d') || config.includes('3d') || config.includes('6d')) {
+                return 'd-block';
+            } else {
+                return 's-block';
+            }
+        }
+        
+        function getGroupName(groupNum) {
+            const groupNames = {
+                1: 'Alkali metals (Group 1A)',
+                2: 'Alkaline Earth metals (Group 2A)',
+                3: 'Scandium group (Group 3B)',
+                4: 'Titanium group (Group 4B)',
+                5: 'Vanadium group (Group 5B)',
+                6: 'Chromium group (Group 6B)',
+                7: 'Manganese group (Group 7B)',
+                8: 'Iron group (Group 8B)',
+                9: 'Cobalt group (Group 8B)',
+                10: 'Nickel group (Group 8B)',
+                11: 'Copper group (Group 1B)',
+                12: 'Zinc group (Group 2B)',
+                13: 'Boron group (Group 3A)',
+                14: 'Carbon group (Group 4A)',
+                15: 'Nitrogen group (Group 5A)',
+                16: 'Oxygen group (Group 6A)',
+                17: 'Halogens (Group 7A)',
+                18: 'Noble gases[inert gas] (Zero group)'
+            };
+            return groupNames[groupNum] || 'Group ' + groupNum;
+        }
+        
+        function getStateOfMatter(atomicNumber, symbol, elementType) {
+            // Gases at room temperature
+            const gases = [1, 2, 7, 8, 9, 10, 17, 18, 36, 54, 86, 118]; // H, He, N, O, F, Ne, Cl, Ar, Kr, Xe, Rn, Og
+            
+            // Liquids at room temperature
+            const liquids = [35, 80]; // Br (nonmetal), Hg (metal)
+            
+            // Metalloids (special classification)
+            const metalloids = [5, 14, 32, 33, 51, 52]; // B, Si, Ge, As, Sb, Te
+            
+            // Determine material type
+            let materialType = 'Nonmetal';
+            
+            if (metalloids.includes(atomicNumber)) {
+                materialType = 'Metalloid';
+            } else {
+                const metalTypes = ['alkali', 'alkaline', 'transition', 'post-transition', 'lanthanide', 'actinide'];
+                const isMetal = metalTypes.some(type => elementType.includes(type));
+                materialType = isMetal ? 'Metal' : 'Nonmetal';
+            }
+            
+            if (gases.includes(atomicNumber)) {
+                return `${materialType} Gas`;
+            } else if (liquids.includes(atomicNumber)) {
+                return `${materialType} Liquid`;
+            } else {
+                return `${materialType} Solid`;
+            }
+        }
+        
+        function showModal(e) {
+            document.getElementById('modalSym').textContent = e.s;
+            document.getElementById('modalName').textContent = e.nm;
+            const block = getBlock(e.c);
+            const groupName = getGroupName(e.g);
+            const stateOfMatter = getStateOfMatter(e.n, e.s, e.t);
+            document.getElementById('modalInfo').innerHTML = `
+                <div class="info-row"><span class="info-label">Atomic Number:</span><span class="info-val">${e.n}</span></div>
+                <div class="info-row"><span class="info-label">Atomic Mass:</span><span class="info-val">${e.m}</span></div>
+                <div class="info-row"><span class="info-label">State of Matter:</span><span class="info-val">${stateOfMatter}</span></div>
+                <div class="info-row"><span class="info-label">Category:</span><span class="info-val">${e.t}</span></div>
+                <div class="info-row"><span class="info-label">Block:</span><span class="info-val">${block}</span></div>
+                <div class="info-row"><span class="info-label">Group:</span><span class="info-val">${groupName}</span></div>
+                <div class="info-row"><span class="info-label">Period:</span><span class="info-val">${e.p}</span></div>
+                <div class="info-row"><span class="info-label">Electron Config:</span><span class="info-val">${e.c}</span></div>
+            `;
+            document.getElementById('modal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+        
+        function showTableInfo() {
+            const totalElements = elements.length;
+            const periods = 7;
+            const groups = 18;
+            const blocks = ['s-block', 'p-block', 'd-block', 'f-block'];
+            
+            document.getElementById('tableInfoContent').innerHTML = `
+                <div class="info-row"><span class="info-label">Total Elements:</span><span class="info-val">${totalElements}</span></div>
+                <div class="info-row"><span class="info-label">Periods (Rows):</span><span class="info-val">${periods}</span></div>
+                <div class="info-row"><span class="info-label">Groups (Columns):</span><span class="info-val">${groups}</span></div>
+                <div class="info-row"><span class="info-label">Orbital Blocks:</span><span class="info-val">s, p, d, f</span></div>
+                <div class="info-row"><span class="info-label">Categories:</span><span class="info-val">11 categories of elements</span></div>
+                <div class="info-row"><span class="info-label">Atomic Number Range:</span><span class="info-val">1 - 118</span></div>
+                <div class="info-row"><span class="info-label">About:</span><span class="info-val">This is an interactive periodic table. Click on any element to see detailed information including atomic number, mass, electron configuration, period, group, and orbital block.</span></div>
+            `;
+            document.getElementById('infoModal').classList.add('active');
+        }
+        
+        function closeTableInfo() {
+            document.getElementById('infoModal').classList.remove('active');
+        }
+        
+        document.getElementById('infoModal').addEventListener('click', (e) => {
+            if(e.target.id === 'infoModal') closeTableInfo();
+        });
+        
+        // Render main periodic table
+        elements.filter(e => !['lanthanide','actinide'].includes(e.t)).forEach(e => {
+            document.getElementById('table').appendChild(makeElement(e));
+        });
+        
+        // Render lanthanides
+        elements.filter(e => e.t === 'lanthanide').sort((a,b) => a.n - b.n).forEach((e,i) => {
+            const el = makeElement(e);
+            el.style.gridColumn = i + 1;
+            el.style.gridRow = 'auto';
+            document.getElementById('lanthanides').appendChild(el);
+        });
+        
+        // Render actinides
+        elements.filter(e => e.t === 'actinide').sort((a,b) => a.n - b.n).forEach((e,i) => {
+            const el = makeElement(e);
+            el.style.gridColumn = i + 1;
+            el.style.gridRow = 'auto';
+            document.getElementById('actinides').appendChild(el);
+        });
+    </script>
+
+
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
